@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:chat_app/widgets/user_image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -17,11 +20,17 @@ class _AuthScreenState extends State<AuthScreen> {
   var _isLogin = true;
   var _enteredEmail = '';
   var _enteredPassword = '';
+  File? _selectedImage;
 
   void _submit() async {
     final isValid = _formKey.currentState!.validate();
 
     if (!isValid) {
+      return;
+    }
+
+    if (!_isLogin && _selectedImage == null) {
+      // TODO: Show "Please select an imagen" error
       return;
     }
 
@@ -41,7 +50,7 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     } on FirebaseAuthException catch (error) {
       if (error.code == 'email-already-in-use') {
-        // ...
+        // TODO: Show specific errors for the diferent firebase sdk error codes
       }
 
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -80,6 +89,12 @@ class _AuthScreenState extends State<AuthScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            if (!_isLogin)
+                              UserImagePicker(
+                                onPickImage: (pickedImage) {
+                                  _selectedImage = pickedImage;
+                                },
+                              ),
                             TextFormField(
                               decoration: const InputDecoration(
                                   labelText: 'Email Address'),
